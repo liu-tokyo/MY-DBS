@@ -1,8 +1,10 @@
-# `Ubuntu` 上安装 `Docker`
+# 制作 OracleDB 容器 - Oracle DB 21c
+
+制作 Oracle DB 21.3.0 版本的容器，这样 Oracle 数据库可以用 Docker 启动。
+
+## 安装 Docker
 
 > [Ubuntu 20.04へのDockerのインストールおよび使用方法 | DigitalOcean](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04-ja)
->
-> 
 
 ```
 sudo apt-get remove docker docker-engine docker.io containerd runc
@@ -145,7 +147,7 @@ sudo docker run hello-world
 
   ※正常情况下，会顺利执行结束。
 
-## OracleDB 21C的Image作成
+## 制作数据库容器
 
 - 参考网站
 
