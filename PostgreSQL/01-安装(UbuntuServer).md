@@ -351,7 +351,7 @@ Postgres 身份验证系统默认做出的另一个假设是，对于用于登�
 
   
 
-## 6. 使用新角色
+## 7. 使用新角色
 
 - 使用新角色打开 Postgres 提示符
 
@@ -397,13 +397,13 @@ Postgres 身份验证系统默认做出的另一个假设是，对于用于登�
 
 
 
-## 7. 使用Navicat链接
+## 8. 使用Navicat链接
 
 `Navicat` 是一套可创建多个连接的数据库管理工具，用以方便管理 MySQL、Oracle、PostgreSQL、SQLite、SQL Server、MariaDB 和 MongoDB 等不同类型的数据库，它与阿里云、腾讯云、华为云、Amazon RDS、Amazon Aurora、Amazon Redshift、Microsoft Azure、Oracle Cloud 和 MongoDB Atlas等云数据库兼容。你可以创建、管理和维护数据库。Navicat 的功能足以满足专业开发人员的所有需求，但是对数据库服务器初学者来说又简单易操作。Navicat 的用户界面 (GUI) 设计良好，让你以安全且简单的方法创建、组织、访问和共享信息。
 
 
 
-## 8. 卸载数据库
+## 9. 卸载数据库
 
 - 卸载指令
 
@@ -420,9 +420,9 @@ Postgres 身份验证系统默认做出的另一个假设是，对于用于登�
 
 
 
-## 9. 错误对应
+## A. 错误对应
 
-### 9.1 建立连接出错
+### A.1 建立连接出错
 
 - 连接的时候出现如下错误：
 
