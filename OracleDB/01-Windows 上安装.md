@@ -70,11 +70,11 @@
 
   ```SQL
   -- 创建数据库
-  CREATE PLUGGABLE DATABASE vip_db admin user vip_db identified by vip_db 
+  CREATE PLUGGABLE DATABASE vip_pdb admin user vip_pdb identified by vip_pdb 
     STORAGE (MAXSIZE 2G MAX_SHARED_TEMP_SIZE 100M)
-    DEFAULT TABLESPACE users datafile 'C:\app\liu\product\21c\oradata\XE\vip_db\vip_db.dbf' size 100M
-    PATH_PREFIX ='C:\app\liu\product\21c\oradata\XE\vip_db\'
-    FILE_NAME_CONVERT = ('C:\app\liu\product\21c\oradata\XE\PDBSEED\','C:\app\liu\product\21c\oradata\XE\vip_db\');
+    DEFAULT TABLESPACE users datafile 'C:\app\liu\product\21c\oradata\XE\vip_pdb\vip_pdb.dbf' size 100M
+    PATH_PREFIX ='C:\app\liu\product\21c\oradata\XE\vip_pdb\'
+    FILE_NAME_CONVERT = ('C:\app\liu\product\21c\oradata\XE\PDBSEED\','C:\app\liu\product\21c\oradata\XE\vip_pdb\');
   
   ```
 
@@ -85,16 +85,16 @@
   SHOW PDBS;
   
   -- 切换当前会话到某个pdb中,并授权给管理用户
-  ALTER SESSION SET CONTAINER=VIP_DB;
+  ALTER SESSION SET CONTAINER=VIP_PDB;
   
   -- 打开指定pdb
-  ALTER PLUGGABLE DATABASE VIP_DB OPEN;
+  ALTER PLUGGABLE DATABASE VIP_PDB OPEN;
   
   -- 授予所有权利
-  GRANT ALL PRIVILEGES TO VIP_DB;
+  GRANT ALL PRIVILEGES TO VIP_PDB;
   
   -- 关闭指定pdb
-  ALTER PLUGGABLE DATABASE VIP_DB CLOSE IMMEDIATE ;
+  ALTER PLUGGABLE DATABASE VIP_PDB CLOSE IMMEDIATE ;
   
   -- 重启数据库，容器数据库自动重启，保持当前的状态。
   -- ORA-65040: 不允许从插接式数据库内部执行该操作
@@ -127,7 +127,7 @@
 
   ```SQL
   -- 更改会话对象 PDB
-  ALTER SESSION SET container=VIP_DB;
+  ALTER SESSION SET container=VIP_PDB;
   
   -- 创建用户 （user1）
   CREATE USER user1 IDENTIFIED BY "password" DEFAULT TABLESPACE users TEMPORARY TABLESPACE temp;
@@ -167,6 +167,7 @@
     );
   END;
   /
+  
   ```
 
 - 查询创建结果
