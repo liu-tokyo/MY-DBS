@@ -182,6 +182,8 @@
 
 ## 4. 创建 AQ 数据表
 
+### 4.1 创建 AQ
+
 - 批处理指令：
 
   ```SQL
@@ -229,9 +231,32 @@
   
   ```
 
+### 4.2 查询 AQ
+
 - 查询创建结果
 
-  ```
+  ```SQL
+  -- 显示当前容器
+  SHOW CON_NAME;
+  -- SYS_CONTEXT 函数是Oracle提供的一个获取环境上下文信息的预定义函数。该函数用来返回一个指定namespace下的parameter值。该函数可以在SQL和PL/SQL语言中使用。
+  SELECT SYS_CONTEXT ('USERENV', 'CON_NAME') FROM DUAL;
+  
+  -- 查询当前容器信息
+  SELECT CON_ID,DBID,NAME,OPEN_MODE FROM V$PDBS;
+  
+  -- 切换容器
+  -- ALTER SESSION SET container=ORCLPDB;
+  ALTER SESSION SET CONTAINER=XEPDB1;
+  
+  -- 查询创建的 QUEUE
+  SELECT * FROM DBA_TABLES WHERE OWNER='USER1';
+  SELECT * FROM ALL_TABLES WHERE OWNER='USER1';
+  SELECT table_name FROM DBA_TABLES WHERE OWNER='USER1';
+  
+  -- 查询表名中含有 VIP 字符的数据表
+  SELECT * FROM DBA_TABLES WHERE TABLE_NAME LIKE '%VIP%';
+  SELECT * FROM ALL_TABLES WHERE TABLE_NAME LIKE '%VIP%';
+  SELECT * FROM USER_TABLES WHERE TABLE_NAME LIKE '%VIP%';
   
   ```
   

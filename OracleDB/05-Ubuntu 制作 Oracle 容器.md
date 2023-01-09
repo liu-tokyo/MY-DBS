@@ -280,7 +280,9 @@
 
   最快速的硬盘需要 11（678s） 分钟左右，外置 SSD 硬盘需要 2042秒（35分钟） 分钟；不知道为啥，外置的机械硬盘跑了 2 天才结束。
 
-- 创建镜像的参数：
+### 2.2 创建镜像参数
+
+- 创建镜像的参数（请参照[官方](https://github.com/oracle/docker-images/tree/main/OracleDatabase/SingleInstance)文档）：
 
   ```bash
   Parameters:
@@ -296,15 +298,35 @@
   * select one edition only: -e, -s, or -x
   ```
 
-  例如创建 Oracle XE 版本的镜像，就不需要去下载 ZIP 文件，直接创建即可：
+### 2.3 XE 版本注意事项
+
+- 例如创建 Oracle XE 版本的镜像，就不需要去下载 ZIP 文件，直接创建即可：
 
   ```bash
+  cd docker-images
+  cd OracleDatabase/SingleInstance/dockerfiles
   sudo ./buildContainerImage.sh -v 21.3.0 -x -i
   ```
 
-  
+- 当然了，启动指令也有少许变化：
 
-### 2.2 镜像制作 - 批处理
+  ```bash
+  sudo docker run \
+  	--name oracle21c \
+  	-p 1521:1521 \
+  	-p 5500:5500 \
+  	-e ORACLE_PDB=XEPDB1 \
+  	-e ORACLE_PWD=password \
+  	-e INIT_SGA_SIZE=3000 \
+  	-e INIT_PGA_SIZE=1000 \
+  	-v /opt/oracle/oradata \
+  	-d \
+  oracle/database:21.3.0-xe
+  ```
+
+  Windows的XE版本，默认创建 XEPDB1 的插接式的数据库，而 EE 版默认创建 ORCLPDB 数据库。ORACLE_PDB 设置为 ORCL 的话，不明原因导致失败。
+
+### 2.4 镜像制作 - 批处理
 
 - 批处理文件（`create_oracle_db_docker_image.sh`）：
 
@@ -450,9 +472,105 @@
 
 这一点和 Windows 上的安装版有所不同，不需要为了 远程连接 作特别的修改。毕竟容器方式本身必须对外提供服务，才有意义。
 
+### 3.6 随机启动
 
+- 将正在运行的容器设为自启动：
 
-## 4. 学习小结
+  ```bash
+  ## docker update --restart=always 容器名或容器ID
+  docker update --restart=always <CONTAINER ID>
+  
+  ## 例如将 oracle21c 设为自启动
+  docker update --restart=always oracle21c
+  ```
+
+- 将自启动的容器取消自启动：
+
+  ```bash
+  # docker update --restart=no 容器名或容器ID
+  docker update --restart=no <CONTAINER ID>
+  
+  # 例如取消 oracle21c 的自启动
+  docker update --restart=no oracle21c
+  ```
+
+当然，也可以在容器启动指令中，直接指定随机启动参数。
+
+## 4. Sqlplus 切换用户
+
+- 登录到 Oracle
+
+  ```bash
+  Sqlplus 用户名/密码
+  
+  Sqlplus 用户名/密码@全局数据区的唯一表示(SID)
+  ```
+
+- Sqlplus 使用 sysdba 用户登录后，切换到普通用户一般使用conn方式，然后切回 sysdba 用户：
+
+  ```bash
+  ## SYSDBA 用户登录后
+  $ SQLPLUS / AS SYSDBA
+  
+  ## 显示当前用户
+  SQL> SHOW USER;
+  
+  ## 切换到普通用户
+  SQL> CONN user1/password
+  
+  ## 切换到sysdba用户
+  SQL> CONN SYS AS SYSDBA
+  # 回车后输入密码即可
+  ```
+
+  其它辅助指令：
+
+  ```SQL
+  -- 查看数据库里面所有用户，前提是你是有dba权限的帐号，如sys,system
+  SELECT * FROM DBA_USERS ORDER BY USERNAME;
+  
+  -- 查看你能管理的所有用户！
+  SELECT * FROM ALL_USERS ORDER BY USERNAME;
+  
+  -- 查看当前用户信息 ！
+  SELECT * FROM USER_USERS; 
+  
+  -- 查询当前用户下，有哪些表
+  SELECT * FROM USER_TABLES
+  
+  -- 查询你 当前用户下, 可以访问哪些表 [也就是访问自己 和 其他用户的]
+  SELECT * FROM ALL_TABLES;
+  
+  -- 查询当前数据库所有的表， 需要你有 DBA 的权限
+  SELECT * FROM DBA_TABLES;
+  ```
+
+- 切换用户详细
+
+  ```SQL
+  ## 使用SQL语句修改对应用户的密码
+  ALTER  USER  用户名 IDENTIFIED  BY 密码;
+  
+  ## 切换用户
+  Conn  用户名/密码
+  Conn  用户名/密码@全局数据库名
+  
+  ## 查询当前用户登录的全局数据库名[ 必须在sys/system下才能查询 ]
+  SELECT NAMEFROM  V$DATABASE;
+  
+  ## 查询当前用户登录的数据库实例名
+  SELECT INSTANCE_NAME FROM V$INSTANCE;
+  ```
+
+- sys和system用户的区别
+
+  | #        | Sys                                  | system                           |
+  | -------- | ------------------------------------ | -------------------------------- |
+  | 地位     | Oracle的超级用户                     | Oracle默认的管理员               |
+  | 作用     | 维护系统的信息个管实例               | 管理Oracle数据库的用户/权限/存储 |
+  | 登录身份 | 只能以 sysdba    Sysoper    角色登录 | 可以以普通的形式登录             |
+
+## 5. 学习小结
 
 其它数据库，因为基本都是可以免费使用，所以都可以直接下载安装即可。只有 Oracle DB 的官方网站，想要下载，必须注册才可以，所以安装的时候，手续稍微繁琐。
 
