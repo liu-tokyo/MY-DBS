@@ -1,12 +1,14 @@
 # 制作 OracleDB 容器 - Oracle DB 21c
 
-制作 Oracle DB 21.3.0 版本的容器，这样 Oracle 数据库可以用 Docker 启动。
+制作 Oracle DB 21.3.0 版本的容器，容器通过 Docker 启动。
 
-## 安装 Docker
+> 制作环境：Ubuntu 22.04.1 LST
+
+
+
+## 1. 安装 Docker
 
 > [Ubuntu 20.04へのDockerのインストールおよび使用方法 | DigitalOcean](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04-ja)
-
-### 安装 - 指令
 
 - 在尝试安装新版本之前卸载任何此类旧版本：
 
@@ -14,7 +16,9 @@
   sudo apt-get remove docker docker-engine docker.io containerd runc
   ```
 
-#### 使用存储库安装
+安装有多种方式，参照 Docker [官网](https://docs.docker.com/engine/install/ubuntu/)的说明进行即可。
+
+### 1.1 使用存储库安装
 
 - 设置存储库
 
@@ -67,7 +71,7 @@
   sudo docker run hello-world
   ```
 
-#### 使用软件包安装
+### 1.2 使用软件包安装
 
 如果您不能使用 Docker 的 apt 存储库来安装 Docker Engine，您可以下载您的版本的 deb 文件并手动安装。 每次升级 Docker Engine 时都需要下载一个新文件。
 
@@ -107,7 +111,7 @@
 
 您现在已经成功安装并启动了 Docker 引擎。 docker 用户组存在但不包含任何用户，这就是为什么您需要使用 sudo 来运行 Docker 命令的原因。 继续 Linux 后安装，以允许非特权用户运行 Docker 命令和其他可选配置步骤。
 
-#### 卸载 Docker 引擎
+### 1.3 卸载 Docker 引擎
 
 - 卸载 Docker Engine、CLI、containerd 和 Docker Compose 包：
 
@@ -124,7 +128,7 @@
 
 - 您必须手动删除任何已编辑的配置文件。
 
-### 设置运行权限
+### 1.4 设置运行权限
 
 - 状态确认
 
@@ -148,10 +152,11 @@
   ## su - ${USER}
   ## 您还可以运行以下命令来激活对组的更改：
   newgrp docker
+  # 该指令在批处理里面执行之后，会阻挡继续执行；综合考虑，在安装之后，再次启动电脑，应该是更加简单的。
   ```
   
   通过键入以下内容验证用户是否已添加到 `docker` 组：
-
+  
   ```bash
   id -nG
   ```
@@ -164,7 +169,9 @@
 
 
 
-### 安装 - 批处理
+### 1.5 安装 - 批处理
+
+逐个命令执行，非常繁琐，主要用于熟悉指令；通过批处理方式，更为简便。
 
 - Docker 安装部分
 
@@ -224,7 +231,7 @@
   
   ※正常情况下，会顺利执行结束；需要重新启动（注销、登录）之后，才能保证 `无SUDO` 执行有效。
 
-## 制作数据库镜像
+## 2. 制作数据库镜像
 
 - 参考网站
 
@@ -238,7 +245,7 @@
 
   
 
-### 镜像制作 - 指令
+### 2.1 镜像制作 - 指令
 
 - 在合适的目录内，克隆如下网站：
 
@@ -297,7 +304,7 @@
 
   
 
-### 镜像制作 - 批处理
+### 2.2 镜像制作 - 批处理
 
 - 批处理文件（`create_oracle_db_docker_image.sh`）：
 
@@ -351,9 +358,9 @@
 
   
 
-## 启动数据库
+## 3. 启动数据库
 
-### 启动容器
+### 3.1 启动容器
 
 - 启动指令1：
 
@@ -379,23 +386,23 @@
 
   ```bash
   sudo docker run \
-  --name oracle21c \
-  -p 1521:1521 -p 5500:5500 \
-  -e ORACLE_PDB=orcl \
-  -e ORACLE_PWD=password \
-  -e INIT_SGA_SIZE=3000 \
-  -e INIT_PGA_SIZE=1000 \
-  -v /path/to/store/db/files/:/opt/oracle/oradata \
-  -d \
+  	--name oracle21c \
+  	-p 1521:1521 -p 5500:5500 \
+  	-e ORACLE_PDB=orcl \
+  	-e ORACLE_PWD=password \
+  	-e INIT_SGA_SIZE=3000 \
+  	-e INIT_PGA_SIZE=1000 \
+  	-v /path/to/store/db/files/:/opt/oracle/oradata \
+  	-d \
   oracle/database:21.3.0-ee
   ```
 
 
-- 和安装版本的 Oracle EE 版有所区别，容器方式的话，创建的可插接式 PDB 的名称：
+- 和安装版本的 Oracle EE 版有所区别，容器方式的话，商业版 `Oracle EE` 创建的可插接式 PDB 的名称：
 
   <span style="Color:red">ORCL</span>
 
-### 查询启动状态
+### 3.2 查询启动状态
 
 - 指令
 
@@ -405,7 +412,7 @@
 
   `health: starting` 状态，属于启动中；`health`属于启动结束，处于正常服务状态。
 
-### 修改口令
+### 3.3 修改口令
 
 - 注意：
 
@@ -425,7 +432,7 @@
 
   ※注意：最新的 `21.3.0` 的情况下，是为 `SYSTEM` 用户设置的口令。
 
-### 进入容器执行
+### 3.4 进入容器执行
 
 - 首先运行 `docker ps` 获取容器 ID。 然后运行：
 
@@ -439,6 +446,14 @@
   docker exec -u 0 -it <container id> /bin/bash
   ```
 
-### 远程连接
+### 3.5 远程连接
 
 这一点和 Windows 上的安装版有所不同，不需要为了 远程连接 作特别的修改。毕竟容器方式本身必须对外提供服务，才有意义。
+
+
+
+## 4. 学习小结
+
+其它数据库，因为基本都是可以免费使用，所以都可以直接下载安装即可。只有 Oracle DB 的官方网站，想要下载，必须注册才可以，所以安装的时候，手续稍微繁琐。
+
+即使是可以免费使用的 XE 版本，官方也没有提供可供随便使用的 Docker镜像。不过第三方提供的有类似的镜像。个人可以随便使用，但是公司开发的话，还是用 Oracle官方 提供的工具自我创建的镜像文件，更为靠谱。

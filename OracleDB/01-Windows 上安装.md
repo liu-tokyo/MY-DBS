@@ -2,9 +2,9 @@
 
 
 
-## 安装 Oracle XE
+## 1. 安装 Oracle XE
 
-### 官网下载
+### 1.1 官网下载
 
 - https://www.oracle.com/database/technologies/xe-downloads.html
 
@@ -14,7 +14,7 @@
 
 即使是 XE 版本，文件大小也有将近 2GB 之大。
 
-### 软件安装
+### 1.2 软件安装
 
 - 解压缩之后，点击 `setup.exe` 开始安装；
 
@@ -38,9 +38,9 @@
 
   <span style="color:red">XEPDB1</span>
 
-## 安装 Oracle EE
+## 2. 安装 Oracle EE
 
-### 官网下载
+### 2.1 官网下载
 
 - https://www.oracle.com/database/technologies/oracle-database-software-downloads.html
 
@@ -48,7 +48,7 @@
 
   下载文件名称：`OracleXE213_Win64.zip`
 
-### 软件安装
+### 2.2 软件安装
 
 - 解压缩之后，点击 `setup.exe` 开始安装；
 
@@ -74,7 +74,7 @@
 
   <span style="color:red">ORCLPDB</span>
 
-## 创建插接式数据库
+## 3. 创建插接式数据库
 
 一个容器数据库CDB由一个根容器（CDBSEED）和0个、1个或多个可插拔数据库（PDB）组成。其中，
 
@@ -84,7 +84,7 @@
 
 **※**：12c之前的数据库都是非容器数据库（non-CDB）。
 
-### 设置环境变量
+### 3.1 设置环境变量
 
 - 设置环境变量：
 
@@ -96,7 +96,7 @@
 
   **※** 估计 Linux 环境需要设置，至少 Windows 环境下面，没有设置如上变量，操作没啥问题。是否设置以后有些指令里面的内容可以通用化？
 
-### 创建数据库
+### 3.2 创建数据库
 
 - 登录数据库：
 
@@ -180,7 +180,7 @@
 
   
 
-## 创建 AQ 数据表
+## 4. 创建 AQ 数据表
 
 - 批处理指令：
 
@@ -234,12 +234,12 @@
   ```
   
   ```
+  
+  通过 A5M2 连接数据库之后，可以看到 AQ 的创建效果。
 
 
 
-
-
-## 相关参考网站
+## 补：相关参考网站
 
 - https://www.cnblogs.com/lottu/p/14946192.html
 
@@ -273,4 +273,9 @@ Oracle 官方[网站](https://docs.oracle.com/database/121/SQLRF/statements_6010
     PATH_PREFIX = '/disk1/oracle/dbs/salespdb/';
   ```
 
-  
+
+
+
+## 学习小结
+
+从 **12C** 开始，Oracle DB 的理念有所变更（为了适应云端？），表现的是，指令也会发生变化，使用中要注意这些变化。
