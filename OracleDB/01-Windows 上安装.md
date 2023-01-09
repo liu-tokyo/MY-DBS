@@ -34,7 +34,45 @@
   | 插接式数据库     | localhost:1521/XEPDB1     |      |
   | EM Express URL   | https://localhost:5500/em |      |
 
-  
+- 插接式数据库名称：
+
+  <span style="color:red">XEPDB1</span>
+
+## 安装 Oracle EE
+
+### 官网下载
+
+- https://www.oracle.com/database/technologies/oracle-database-software-downloads.html
+
+  当前（2022.01.06）最新版本 `Oracle Database 21c`
+
+  下载文件名称：`OracleXE213_Win64.zip`
+
+### 软件安装
+
+- 解压缩之后，点击 `setup.exe` 开始安装；
+
+  需要拷贝到本地硬盘 `C:\WINDOWS.X64_213000_db_home`，虚拟机共享方式无法安装？不支持 UNC 路径方式，这一点和 XE 版本有所不同。看来商业版本 和 XE版本面向的对象不一样，所以在安装方法上，差异还是不小的。
+
+  这样的话，不需要宿主机解压，用 `7.zip` 直接解压到虚拟机的本地硬盘，速度更快。
+
+- 安装参数如下，基本采用默认参数：
+
+  | 项目             | 参数             | 备考                       |
+  | ---------------- | ---------------- | -------------------------- |
+  | Oracle 基目录    | C:\DB            | `C:\` 这个默认的路径不能用 |
+  | 数据库文件位置   | C:\oradata       |                            |
+  | 数据库版本       | 企业版           |                            |
+  | 字符集           | Unicode          |                            |
+  | 全局数据库名称   | orcl.localdomain |                            |
+  | 可插入数据库名称 | orclpdb          |                            |
+  | 密码             | qwer1234         |                            |
+
+  Oracle Enterprise Manager Database Express URL：https://localhost:5500/em
+
+- 插接式数据库名称：
+
+  <span style="color:red">ORCLPDB</span>
 
 ## 创建插接式数据库
 
@@ -56,6 +94,8 @@
   ORACLE_SID=XE
   ```
 
+  **※** 估计 Linux 环境需要设置，至少 Windows 环境下面，没有设置如上变量，操作没啥问题。是否设置以后有些指令里面的内容可以通用化？
+
 ### 创建数据库
 
 - 登录数据库：
@@ -70,7 +110,7 @@
 
   ```SQL
   -- 创建数据库
-  CREATE PLUGGABLE DATABASE vip_pdb admin user vip_pdb identified by vip_pdb 
+  CREATE PLUGGABLE DATABASE vip_pdb admin user vip_pdb_admin identified by Passw0rd 
     STORAGE (MAXSIZE 2G MAX_SHARED_TEMP_SIZE 100M)
     DEFAULT TABLESPACE users datafile 'C:\app\liu\product\21c\oradata\XE\vip_pdb\vip_pdb.dbf' size 100M
     PATH_PREFIX ='C:\app\liu\product\21c\oradata\XE\vip_pdb\'
@@ -78,7 +118,26 @@
   
   ```
 
-  Oracle数据库中，`jpaas_system` 会自动被转换为大写字符的 `JPAAS_SYSTEM` 。
+  上面的指令在 XE 版本，没有问题；但是在 EE 版本，需要把 `C:\app\liu\product\21c\oradata` ，根据实际环境，替换为 ` C:\DB\oradata\ORCL` 。
+
+  ```SQL
+  CREATE PLUGGABLE DATABASE vip_pdb admin user vip_pdb_admin identified by Passw0rd 
+    STORAGE (MAXSIZE 2G MAX_SHARED_TEMP_SIZE 100M)
+    DEFAULT TABLESPACE users datafile 'C:\DB\oradata\ORCL\vip_pdb\vip_pdb.dbf' size 100M
+    PATH_PREFIX ='C:\DB\oradata\ORCL\vip_pdb\'
+    FILE_NAME_CONVERT = ('C:\DB\oradata\ORCL\PDBSEED\','C:\DB\oradata\ORCL\vip_pdb\');
+  
+  ```
+
+  简化版：
+
+  ```SQL
+  CREATE PLUGGABLE DATABASE vip_pdb admin user vip_pdb_admin identified by Passw0rd 
+    FILE_NAME_CONVERT = ('C:\DB\oradata\ORCL\PDBSEED\','C:\DB\oradata\ORCL\vip_pdb\');
+  
+  ```
+
+  Oracle数据库中，`vip_pdb` 会自动被转换为大写字符的 `VIP_PDB` 。
 
   ```SQL
   -- 查看数据库
@@ -91,7 +150,7 @@
   ALTER PLUGGABLE DATABASE VIP_PDB OPEN;
   
   -- 授予所有权利
-  GRANT ALL PRIVILEGES TO VIP_PDB;
+  GRANT ALL PRIVILEGES TO VIP_PDB_ADMIN;
   
   -- 关闭指定pdb
   ALTER PLUGGABLE DATABASE VIP_PDB CLOSE IMMEDIATE ;
@@ -174,6 +233,44 @@
 
   ```
   
+  ```
+
+
+
+
+
+## 相关参考网站
+
+- https://www.cnblogs.com/lottu/p/14946192.html
+
+  比较详细的操作过程
+
+- http://www.manongjc.com/detail/63-ibfhaqgtattecsz.html
+
+  码农教程
+
+- https://web.baimiaoapp.com/
+
+  在线图片识别转化为文字
+
+### 官方创建数据库文档
+
+Oracle 官方[网站](https://docs.oracle.com/database/121/SQLRF/statements_6010.htm#SQLRF55686)有如下说明：
+
+- **Creating a PDB by Using the Seed: Example**
+
+  The following statement creates a PDB `salespdb` by using the seed in the CDB as a template. The administrative user `salesadm` is created and granted the `dba` role. The default tablespace assigned to any non-`SYSTEM` users for whom no permanent tablespace is assigned is `sales`. File names for the new PDB will be constructed by replacing `/disk1/oracle/dbs/pdbseed/` in the file names in the seed with `/disk1/oracle/dbs/salespdb/`. All tablespaces that belong to `sales` must not exceed 2G. The location of all directory object paths associated with `salespdb` are restricted to the directory `/disk1/oracle/dbs/salespdb/`.
+
+  ```SQL
+  CREATE PLUGGABLE DATABASE salespdb
+    ADMIN USER salesadm IDENTIFIED BY password
+    ROLES = (dba)
+    DEFAULT TABLESPACE sales
+      DATAFILE '/disk1/oracle/dbs/salespdb/sales01.dbf' SIZE 250M AUTOEXTEND ON
+    FILE_NAME_CONVERT = ('/disk1/oracle/dbs/pdbseed/',
+                         '/disk1/oracle/dbs/salespdb/')
+    STORAGE (MAXSIZE 2G)
+    PATH_PREFIX = '/disk1/oracle/dbs/salespdb/';
   ```
 
   

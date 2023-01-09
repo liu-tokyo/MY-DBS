@@ -6,107 +6,177 @@
 
 > [Ubuntu 20.04へのDockerのインストールおよび使用方法 | DigitalOcean](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04-ja)
 
-```
-sudo apt-get remove docker docker-engine docker.io containerd runc
-```
+### 安装 - 指令
 
-```
-sudo apt-get update
-sudo apt-get -y install \
-    ca-certificates \
-    curl \
-    gnupg \
-    lsb-release
-```
+- 在尝试安装新版本之前卸载任何此类旧版本：
 
+  ```bash
+  sudo apt-get remove docker docker-engine docker.io containerd runc
+  ```
 
+#### 使用存储库安装
 
-```
-sudo mkdir -p /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-```
+- 设置存储库
 
+  ```bash
+  sudo apt-get update
+  sudo apt-get install \
+      ca-certificates \
+      curl \
+      gnupg \
+      lsb-release
+  ```
 
+- 添加 Docker 的官方 GPG 密钥：
 
-```
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-```
+  ```bash
+  sudo mkdir -p /etc/apt/keyrings
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  ```
 
+- 使用以下命令设置存储库：
 
+  ```bash
+  echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  ```
 
-```
-sudo apt-get update
-```
+- 更新 apt 包索引：
 
+  ```bash
+  sudo apt-get update
+  ```
 
+  您的默认 umask 可能配置不正确，导致无法检测存储库公钥文件。 在更新包索引之前尝试授予 Docker 公钥文件的读取权限：
 
-```
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-sudo apt-get update
-```
+  ```bash
+  sudo chmod a+r /etc/apt/keyrings/docker.gpg
+  sudo apt-get update
+  ```
 
+- 要安装最新版本，请运行：
 
+  ```bash
+  sudo apt-get -y install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+  ```
 
-```
-sudo apt-get -y install docker-ce docker-ce-cli containerd.io docker-compose-plugin
-```
+- 通过运行 hello-world 镜像验证 Docker Engine 安装是否成功：
 
+  ```bash
+  sudo docker run hello-world
+  ```
 
+#### 使用软件包安装
 
-```
-sudo docker run hello-world
-```
+如果您不能使用 Docker 的 apt 存储库来安装 Docker Engine，您可以下载您的版本的 deb 文件并手动安装。 每次升级 Docker Engine 时都需要下载一个新文件。
 
+- 官网下载
 
+  https://download.docker.com/linux/ubuntu/dists/
+
+  在列表中选择您的 Ubuntu 版本。
+
+  到 `pool/stable` 下面，并选择适用的架构 (amd64, armhf, arm64, or s390x)
+
+- 为 Docker Engine、CLI、containerd 和 Docker Compose 包下载以下 deb 文件：
+
+  - `containerd.io_<version>_<arch>.deb`
+  - `docker-ce_<version>_<arch>.deb`
+  - `docker-ce-cli_<version>_<arch>.deb`
+  - `docker-compose-plugin_<version>_<arch>.deb`
+
+- 安装 .deb 包。 将以下示例中的路径更新为您下载 Docker 包的位置。
+
+  ```bash
+  sudo dpkg -i ./containerd.io_<version>_<arch>.deb \
+    ./docker-ce_<version>_<arch>.deb \
+    ./docker-ce-cli_<version>_<arch>.deb \
+    ./docker-compose-plugin_<version>_<arch>.deb
+  ```
+
+  Docker 守护进程自动启动。
+
+- 通过运行 hello-world 镜像验证 Docker Engine 安装是否成功：
+
+  ```bash
+  sudo docker run hello-world
+  ```
+
+  此命令下载测试图像并在容器中运行它。 当容器运行时，它会打印一条确认消息并退出。
+
+您现在已经成功安装并启动了 Docker 引擎。 docker 用户组存在但不包含任何用户，这就是为什么您需要使用 sudo 来运行 Docker 命令的原因。 继续 Linux 后安装，以允许非特权用户运行 Docker 命令和其他可选配置步骤。
+
+#### 卸载 Docker 引擎
+
+- 卸载 Docker Engine、CLI、containerd 和 Docker Compose 包：
+
+  ```bash
+  sudo apt-get purge docker-ce docker-ce-cli containerd.io docker-compose-plugin
+  ```
+
+- 主机上的图像、容器、卷或自定义配置文件不会自动删除。 删除所有镜像、容器和卷：
+
+  ```bash
+  sudo rm -rf /var/lib/docker
+  sudo rm -rf /var/lib/containerd
+  ```
+
+- 您必须手动删除任何已编辑的配置文件。
+
+### 设置运行权限
 
 - 状态确认
 
-  ```
+  ```bash
   sudo systemctl status docker
   ```
 
 - 无 `sudo` 使用 `Docker`
 
-  把当前的用户名添加到 `docker` 组，以避免每次运行 `docker` 命令时都键入 `sudo`。
+  > 官网参考：https://docs.docker.com/engine/install/linux-postinstall/
 
-  ```
+  把当前的用户名添加到 `docker` 组，以避免每次运行 `docker` 命令时都键入 `sudo`。
+  
+  ```bash
   sudo usermod -aG docker ${USER}
   ```
 
   要应用新的组成员资格，需要退出服务器并重新登录；或者键入如下指令（避免重新登录）：
-
+  
+  ```bash
+  ## su - ${USER}
+  ## 您还可以运行以下命令来激活对组的更改：
+  newgrp docker
   ```
-  su - ${USER}
-  ```
-
+  
   通过键入以下内容验证用户是否已添加到 `docker` 组：
 
-  ```
+  ```bash
   id -nG
   ```
-
+  
   如果您需要将用户添加到未登录的 `docker` 组，请使用以下方式显式声明该用户名：
-
-  ```
+  
+  ```bash
   sudo usermod -aG docker username
   ```
 
 
 
-### Docker安装批处理
+### 安装 - 批处理
 
-- 批处理文件详细
+- Docker 安装部分
 
-  把如下内容保存到 `docker_install.sh` 的文件中：
+  `docker_setup.sh`：
 
   ```bash
   #!/bin/bash
   
-  # remove old version
+  ## 卸载任何此类旧版本
   sudo apt-get remove docker docker-engine docker.io containerd runc
   
+  ## 设置存储库
   sudo apt-get update
   sudo apt-get -y install \
       ca-certificates \
@@ -114,40 +184,47 @@ sudo docker run hello-world
       gnupg \
       lsb-release
   
+  ## 添加 Docker 的官方 GPG 密钥
   sudo mkdir -p /etc/apt/keyrings
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
   
+  ## 设置存储库
   echo \
     "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
     $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
   
+  ## 更新 apt 包索引
   sudo apt-get update
   
+  ## 授予 Docker 公钥文件的读取权限
   sudo chmod a+r /etc/apt/keyrings/docker.gpg
   sudo apt-get update
   
+  ## 安装最新版本
   sudo apt-get -y install docker-ce docker-ce-cli containerd.io docker-compose-plugin
   
+  ## 权限设置
+  sudo gpasswd -a $USER docker
   sudo usermod -aG docker ${USER}
   
-  su - ${USER}
-  
-  id -nG
+  ## 清除垃圾软件包
+  sudo apt autoclean
+  sudo apt clean
+  sudo apt autoremove
   
   echo "OK : normal finished!"
   ```
 
-- 执行批处理：
+- 批处理执行：
 
-  在保存文件的目录中，打开终端，输入如下指令：
-
+  ```bash
+  sudo chmod 777 docker_setup.sh
+  ./docker_setup.sh
   ```
-  sudo bash ./docker_install.sh
-  ```
+  
+  ※正常情况下，会顺利执行结束；需要重新启动（注销、登录）之后，才能保证 `无SUDO` 执行有效。
 
-  ※正常情况下，会顺利执行结束。
-
-## 制作数据库容器
+## 制作数据库镜像
 
 - 参考网站
 
@@ -161,42 +238,66 @@ sudo docker run hello-world
 
   
 
+### 镜像制作 - 指令
 
+- 在合适的目录内，克隆如下网站：
 
-```
-git clone https://github.com/oracle/docker-images.git
-cd docker-images
-```
+  ```bash
+  git clone https://github.com/oracle/docker-images.git
+  cd docker-images
+  ```
 
+- 把下载的 `LINUX.X64_213000_db_home.zip` 文件，转移到如下位置：
 
+  ```bash
+  cd OracleDatabase/SingleInstance/dockerfiles/21.3.0
+  mv ~/Downloads/LINUX.X64_213000_db_home.zip .
+  ```
 
-```
-cd OracleDatabase/SingleInstance/dockerfiles/21.3.0
-mv ~/Downloads/LINUX.X64_213000_db_home.zip .
-```
+- 执行创建镜像指令 （Oracle EE）：
 
+  ```bash
+  cd ..
+  sudo ./buildContainerImage.sh -v 21.3.0 -e -i
+  ```
 
+  比较花费时间，出现如下信息，证明创建镜像成功：
 
-```
-cd ..
-sudo ./buildContainerImage.sh -v 21.3.0 -e -i
-```
+  ```bash
+    Oracle Database container image for 'ee' version 21.3.0 is ready to be extended: 
+      
+      --> oracle/database:21.3.0-ee
+  
+    Build completed in 678 seconds.
+  ```
 
+  最快速的硬盘需要 11（678s） 分钟左右，外置 SSD 硬盘需要 2042秒（35分钟） 分钟；不知道为啥，外置的机械硬盘跑了 2 天才结束。
 
+- 创建镜像的参数：
 
-```
-  Oracle Database container image for 'ee' version 21.3.0 is ready to be extended: 
-    
-    --> oracle/database:21.3.0-ee
+  ```bash
+  Parameters:
+     -v: version to build
+         Choose one of: 11.2.0.2  12.1.0.2  12.2.0.1  18.3.0  18.4.0  19.3.0  21.3.0
+     -t: image_name:tag for the generated docker image
+     -e: creates image based on 'Enterprise Edition'
+     -s: creates image based on 'Standard Edition 2'
+     -x: creates image based on 'Express Edition'
+     -i: ignores the MD5 checksums
+     -o: passes on container build option
+  
+  * select one edition only: -e, -s, or -x
+  ```
 
-  Build completed in 678 seconds.
-```
+  例如创建 Oracle XE 版本的镜像，就不需要去下载 ZIP 文件，直接创建即可：
 
-最快速的硬盘需要 11（678s） 分钟左右，外置 SSD 硬盘需要 2042秒（35分钟） 分钟；不知道为啥，外置的机械硬盘跑了 2 天才结束。
+  ```bash
+  sudo ./buildContainerImage.sh -v 21.3.0 -x -i
+  ```
 
+  
 
-
-### 批处理
+### 镜像制作 - 批处理
 
 - 批处理文件（`create_oracle_db_docker_image.sh`）：
 
@@ -244,7 +345,7 @@ sudo ./buildContainerImage.sh -v 21.3.0 -e -i
 
   参数1：下载的 `LINUX.X64_213000_db_home.zip` 文件的全路径，如果实在 `下载` 目录内，指令如下：
 
-  ```
+  ```bash
   sudo bash ./create_oracle_db_docker_image.sh ~/下载/LINUX.X64_213000_db_home.zip
   ```
 
@@ -258,15 +359,15 @@ sudo ./buildContainerImage.sh -v 21.3.0 -e -i
 
   ```bash
   sudo docker run \
-  --name oracle21c \
-  -p 1521:1521 \
-  -p 5500:5500 \
-  -e ORACLE_PDB=orcl \
-  -e ORACLE_PWD=password \
-  -e INIT_SGA_SIZE=3000 \
-  -e INIT_PGA_SIZE=1000 \
-  -v /opt/oracle/oradata \
-  -d \
+  	--name oracle21c \
+  	-p 1521:1521 \
+  	-p 5500:5500 \
+  	-e ORACLE_PDB=orcl \
+  	-e ORACLE_PWD=password \
+  	-e INIT_SGA_SIZE=3000 \
+  	-e INIT_PGA_SIZE=1000 \
+  	-v /opt/oracle/oradata \
+  	-d \
   oracle/database:21.3.0-ee
   ```
 
@@ -289,7 +390,20 @@ sudo ./buildContainerImage.sh -v 21.3.0 -e -i
   oracle/database:21.3.0-ee
   ```
 
-  
+
+- 和安装版本的 Oracle EE 版有所区别，容器方式的话，创建的可插接式 PDB 的名称：
+
+  <span style="Color:red">ORCL</span>
+
+### 查询启动状态
+
+- 指令
+
+  ```bash
+  docker ps -a
+  ```
+
+  `health: starting` 状态，属于启动中；`health`属于启动结束，处于正常服务状态。
 
 ### 修改口令
 
@@ -301,11 +415,11 @@ sudo ./buildContainerImage.sh -v 21.3.0 -e -i
 
   首先运行 docker ps 获取容器 ID。 然后运行：
 
-  ```
+  ```bash
   sudo docker exec <container id> ./setPassword.sh <new password>
   ```
 
-  ```
+  ```bash
   sudo docker exec 187f7110767c ./setPassword.sh qwer1234
   ```
 
@@ -315,13 +429,16 @@ sudo ./buildContainerImage.sh -v 21.3.0 -e -i
 
 - 首先运行 `docker ps` 获取容器 ID。 然后运行：
 
-  ```
+  ```bash
   docker exec -it <container id> /bin/bash
   ```
 
 - 或者作为 root：
 
-  ```
+  ```bash
   docker exec -u 0 -it <container id> /bin/bash
   ```
 
+### 远程连接
+
+这一点和 Windows 上的安装版有所不同，不需要为了 远程连接 作特别的修改。毕竟容器方式本身必须对外提供服务，才有意义。
