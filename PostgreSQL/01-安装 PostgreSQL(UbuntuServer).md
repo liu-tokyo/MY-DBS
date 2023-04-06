@@ -1,4 +1,4 @@
-# Ubuntu 上安装 PostgreSQL
+# Ubuntu Server 上安装 PostgreSQL
 
 ## 1. 安装数据库
 
