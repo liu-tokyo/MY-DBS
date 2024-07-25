@@ -50,7 +50,7 @@ sudo service postgresql restart
 
   出现类似如下信息：
 
-  ```
+  ```bash
   vip@vip:~$ sudo service postgresql status
   [sudo] password for vip:
   ● postgresql.service - PostgreSQL RDBMS
